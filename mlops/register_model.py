@@ -9,7 +9,7 @@ def register_model(version: str = "v2"):
     print(f"[Registry] Initializing Vertex AI...")
     aiplatform.init(project=GCP_PROJECT, location=REGION)
 
-    artifact_uri = f"gs://{GCS_BUCKET}/models/{version}/"
+    artifact_uri         = f"gs://{GCS_BUCKET}/models/{version}/savedmodel/"
 
     print(f"[Registry] Registering model version {version}...")
     print(f"[Registry] Artifact URI: {artifact_uri}")
