@@ -5,42 +5,61 @@ on:
     branches:
       - main
 
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCS_BUCKET: ${{ secrets.GCS_BUCKET }}
+  REGION: us-central1
+  SERVICE_NAME: brain-tumor-backend
+  REPO: brain-tumor-repo
+
 jobs:
   deploy:
     name: Build and Deploy to Cloud Run
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Authenticate with GCP using service account key
       - name: Authenticate with GCP
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # Step 3: Set up gcloud CLI
       - name: Set up gcloud CLI
         uses: google-github-actions/setup-gcloud@v2
         with:
-          project_id: brain-tumor-ai-prod
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 4: Configure Docker for Artifact Registry
-      - name: Configure Docker
+      - name: Configure Docker for Artifact Registry
         run: |
           gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
-      # Step 5: Trigger Cloud Build
-      - name: Trigger Cloud Build
+      - name: Build Docker image
         run: |
-          gcloud builds submit \
-            --config=cloudbuild.yaml \
-            --project=brain-tumor-ai-prod
+          docker build \
+            -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/brain-tumor-repo/backend:${{ github.sha }} \
+            -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/brain-tumor-repo/backend:latest \
+            ./backend
 
-      # Step 6: Confirm deployment
-      - name: Confirm Cloud Run deployment
+      - name: Push Docker image
+        run: |
+          docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/brain-tumor-repo/backend:${{ github.sha }}
+          docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/brain-tumor-repo/backend:latest
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy brain-tumor-backend \
+            --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/brain-tumor-repo/backend:${{ github.sha }} \
+            --region=us-central1 \
+            --platform=managed \
+            --allow-unauthenticated \
+            --memory=2Gi \
+            --cpu=2 \
+            --timeout=120 \
+            --port=8080
+
+      - name: Get Cloud Run URL
         run: |
           gcloud run services describe brain-tumor-backend \
             --region=us-central1 \

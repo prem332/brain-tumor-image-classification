@@ -11,7 +11,7 @@ venv/
 *.pkl
 *.model
 
-# Data — too large for Git
+# Data folders — too large for Git
 data/Training/
 data/Testing/
 data/*.zip
