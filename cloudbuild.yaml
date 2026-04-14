@@ -47,7 +47,7 @@ steps:
       - 'us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/frontend:$BUILD_ID'
       - '-t'
       - 'us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/frontend:latest'
-      - './frontend'
+      - '--build-arg' \n      - 'NEXT_PUBLIC_API_URL=https://brain-tumor-backend-224944730814.us-central1.run.app' \n      - './frontend'
 
   - name: 'gcr.io/cloud-builders/docker'
     id: 'push-frontend'

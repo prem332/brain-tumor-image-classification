@@ -7,78 +7,100 @@ interface Props {
   preview : string | null
 }
 
-const SEVERITY_STYLES: Record<string, string> = {
-  high   : 'bg-red-100 text-red-700 border-red-200',
-  medium : 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  none   : 'bg-green-100 text-green-700 border-green-200'
-}
-
-const SEVERITY_LABEL: Record<string, string> = {
-  high   : 'High Severity',
-  medium : 'Medium Severity',
-  none   : 'No Tumor Detected'
+const SEVERITY_STYLES: Record<string, { bg: string; color: string; label: string }> = {
+  high   : { bg: '#1a0a0a', color: '#f87171', label: 'High Severity' },
+  medium : { bg: '#1a1500', color: '#fbbf24', label: 'Medium Severity' },
+  none   : { bg: '#0a1a0a', color: '#4ade80', label: 'No Tumor Detected' }
 }
 
 const CLASS_COLORS: Record<string, string> = {
-  glioma     : 'bg-red-500',
-  meningioma : 'bg-yellow-500',
-  notumor    : 'bg-green-500',
-  pituitary  : 'bg-blue-500'
+  glioma     : '#ef4444',
+  meningioma : '#f59e0b',
+  notumor    : '#22c55e',
+  pituitary  : '#3b82f6'
 }
 
 export default function ResultCard({ result }: Props) {
-  const severityStyle = SEVERITY_STYLES[result.severity] || SEVERITY_STYLES.none
+  const sev = SEVERITY_STYLES[result.severity] || SEVERITY_STYLES.none
 
   return (
-    <div className="mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-5">
+    <div style={{
+      marginTop: 20,
+      background: '#0d1424',
+      border: '1px solid #1e3a5f',
+      borderRadius: 16,
+      padding: 24,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 20
+    }}>
 
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Prediction Result</p>
-          <h3 className="text-xl font-bold text-gray-900">{result.label}</h3>
-          <p className="text-sm text-gray-500 mt-1">{result.description}</p>
+          <p style={{ fontSize: 11, color: '#475569', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>
+            Prediction Result
+          </p>
+          <h3 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9' }}>{result.label}</h3>
+          <p style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>{result.description}</p>
         </div>
-        <span className={`text-xs font-medium px-3 py-1 rounded-full border ${severityStyle}`}>
-          {SEVERITY_LABEL[result.severity]}
+        <span style={{
+          fontSize: 11, fontWeight: 600, padding: '4px 12px',
+          borderRadius: 20, background: sev.bg, color: sev.color,
+          border: `1px solid ${sev.color}33`, whiteSpace: 'nowrap'
+        }}>
+          {sev.label}
         </span>
       </div>
 
       {/* Confidence */}
       <div>
-        <div className="flex justify-between text-sm mb-1">
-          <span className="text-gray-600 font-medium">Confidence</span>
-          <span className="font-bold text-gray-900">{result.confidence}%</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span style={{ fontSize: 13, color: '#94a3b8' }}>Confidence</span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#f1f5f9' }}>{result.confidence}%</span>
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-2.5">
-          <div
-            className={`h-2.5 rounded-full ${CLASS_COLORS[result.predicted_class] || 'bg-blue-500'}`}
-            style={{ width: `${result.confidence}%` }}
-          />
+        <div style={{ background: '#1e293b', borderRadius: 99, height: 8 }}>
+          <div style={{
+            height: 8, borderRadius: 99,
+            background: CLASS_COLORS[result.predicted_class] || '#3b82f6',
+            width: `${result.confidence}%`,
+            transition: 'width 0.6s ease'
+          }} />
         </div>
       </div>
 
-      {/* All class scores */}
+      {/* All scores */}
       <div>
-        <p className="text-xs text-gray-400 uppercase tracking-wide mb-3">All Class Scores</p>
-        <div className="space-y-2">
+        <p style={{ fontSize: 11, color: '#475569', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
+          All Class Scores
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {Object.entries(result.all_scores)
             .sort(([, a], [, b]) => b - a)
             .map(([cls, score]) => (
               <div key={cls}>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className={`font-medium capitalize ${cls === result.predicted_class ? 'text-gray-900' : 'text-gray-500'}`}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{
+                    fontSize: 12, fontWeight: cls === result.predicted_class ? 600 : 400,
+                    color: cls === result.predicted_class ? '#f1f5f9' : '#64748b'
+                  }}>
                     {cls === result.predicted_class ? `▶ ${cls}` : cls}
                   </span>
-                  <span className={cls === result.predicted_class ? 'font-bold text-gray-900' : 'text-gray-400'}>
+                  <span style={{
+                    fontSize: 12,
+                    color: cls === result.predicted_class ? '#f1f5f9' : '#475569',
+                    fontWeight: cls === result.predicted_class ? 700 : 400
+                  }}>
                     {score}%
                   </span>
                 </div>
-                <div className="w-full bg-gray-100 rounded-full h-1.5">
-                  <div
-                    className={`h-1.5 rounded-full ${CLASS_COLORS[cls] || 'bg-gray-400'}`}
-                    style={{ width: `${score}%` }}
-                  />
+                <div style={{ background: '#1e293b', borderRadius: 99, height: 4 }}>
+                  <div style={{
+                    height: 4, borderRadius: 99,
+                    background: CLASS_COLORS[cls] || '#475569',
+                    width: `${score}%`,
+                    opacity: cls === result.predicted_class ? 1 : 0.4
+                  }} />
                 </div>
               </div>
             ))}
@@ -86,13 +108,12 @@ export default function ResultCard({ result }: Props) {
       </div>
 
       {/* Footer */}
-      <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
-        <p className="text-xs text-gray-400">
-          Model: VGG16 {result.model_version}
-        </p>
-        <p className="text-xs text-red-400 font-medium">
-          For research purposes only — not a medical diagnosis
-        </p>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        paddingTop: 16, borderTop: '1px solid #1e293b'
+      }}>
+        <span style={{ fontSize: 11, color: '#334155' }}>Model: VGG16 {result.model_version}</span>
+        <span style={{ fontSize: 11, color: '#ef4444' }}>For research purposes only — not a medical diagnosis</span>
       </div>
     </div>
   )

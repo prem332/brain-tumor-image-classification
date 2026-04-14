@@ -16,17 +16,16 @@ export interface PredictionResult {
 }
 
 export default function Home() {
-  const [result, setResult]     = useState<PredictionResult | null>(null)
-  const [loading, setLoading]   = useState(false)
-  const [error, setError]       = useState<string | null>(null)
-  const [preview, setPreview]   = useState<string | null>(null)
+  const [result, setResult]   = useState<PredictionResult | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError]     = useState<string | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
 
   const handleUpload = async (file: File) => {
     setLoading(true)
     setError(null)
     setResult(null)
 
-    // Show image preview
     const reader = new FileReader()
     reader.onload = (e) => setPreview(e.target?.result as string)
     reader.readAsDataURL(file)
@@ -61,9 +60,9 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen" style={{ background: '#0a0f1e' }}>
       <Header />
-      <div className="max-w-4xl mx-auto px-4 py-10">
+      <div className="max-w-3xl mx-auto px-4 py-10">
         <UploadSection
           onUpload={handleUpload}
           loading={loading}
@@ -71,13 +70,12 @@ export default function Home() {
           onReset={handleReset}
         />
         {error && (
-          <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+          <div className="mt-6 p-4 rounded-xl text-sm"
+            style={{ background: '#1a0a0a', border: '1px solid #7f1d1d', color: '#fca5a5' }}>
             {error}
           </div>
         )}
-        {result && (
-          <ResultCard result={result} preview={preview} />
-        )}
+        {result && <ResultCard result={result} preview={preview} />}
       </div>
     </main>
   )

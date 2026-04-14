@@ -29,8 +29,13 @@ export default function UploadSection({ onUpload, loading, preview, onReset }: P
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-      <h2 className="text-base font-semibold text-gray-800 mb-4">
+    <div style={{
+      background: '#0d1424',
+      border: '1px solid #1e3a5f',
+      borderRadius: 16,
+      padding: 24
+    }}>
+      <h2 style={{ fontSize: 15, fontWeight: 600, color: '#f1f5f9', marginBottom: 16 }}>
         Upload MRI Scan
       </h2>
 
@@ -40,24 +45,28 @@ export default function UploadSection({ onUpload, loading, preview, onReset }: P
           onDragLeave={() => setDrag(false)}
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-colors
-            ${dragging
-              ? 'border-blue-400 bg-blue-50'
-              : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
-            }`}
+          style={{
+            border: `2px dashed ${dragging ? '#3b82f6' : '#1e3a5f'}`,
+            borderRadius: 12,
+            padding: '48px 24px',
+            textAlign: 'center',
+            cursor: 'pointer',
+            background: dragging ? '#0f1f3d' : '#070d1a',
+            transition: 'all 0.2s'
+          }}
         >
-          <div className="text-4xl mb-3">🧠</div>
-          <p className="text-sm font-medium text-gray-700">
+          <div style={{ fontSize: 36, marginBottom: 12 }}>🧠</div>
+          <p style={{ fontSize: 14, fontWeight: 500, color: '#cbd5e1' }}>
             Drop MRI image here or click to browse
           </p>
-          <p className="text-xs text-gray-400 mt-1">
+          <p style={{ fontSize: 12, color: '#475569', marginTop: 4 }}>
             Supports JPEG, PNG — max 10MB
           </p>
           <input
             ref={inputRef}
             type="file"
             accept="image/jpeg,image/png,image/jpg"
-            className="hidden"
+            style={{ display: 'none' }}
             onChange={(e) => {
               const file = e.target.files?.[0]
               if (file) handleFile(file)
@@ -65,24 +74,29 @@ export default function UploadSection({ onUpload, loading, preview, onReset }: P
           />
         </div>
       ) : (
-        <div className="space-y-4">
-          <div className="rounded-xl overflow-hidden border border-gray-200">
-            <img
-              src={preview}
-              alt="MRI Preview"
-              className="w-full max-h-72 object-contain bg-black"
-            />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #1e3a5f' }}>
+            <img src={preview} alt="MRI Preview"
+              style={{ width: '100%', maxHeight: 280, objectFit: 'contain', background: '#000' }} />
           </div>
           {loading ? (
-            <div className="flex items-center justify-center gap-3 py-3">
-              <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm text-gray-600">Analyzing MRI scan...</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '12px 0' }}>
+              <div style={{
+                width: 18, height: 18,
+                border: '2px solid #3b82f6',
+                borderTopColor: 'transparent',
+                borderRadius: '50%',
+                animation: 'spin 0.8s linear infinite'
+              }} />
+              <span style={{ fontSize: 13, color: '#94a3b8' }}>Analysing MRI scan...</span>
+              <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
             </div>
           ) : (
-            <button
-              onClick={onReset}
-              className="w-full py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
+            <button onClick={onReset} style={{
+              width: '100%', padding: '10px 0', fontSize: 13,
+              color: '#94a3b8', background: 'transparent',
+              border: '1px solid #1e3a5f', borderRadius: 8, cursor: 'pointer'
+            }}>
               Upload another scan
             </button>
           )}
