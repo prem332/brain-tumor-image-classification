@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+
+# Model files — loaded from GCS at runtime
+*.h5
+*.keras
+
+# Git
+.git
+.gitignore
+
+# Misc
+*.log
+.DS_Store
+README.md

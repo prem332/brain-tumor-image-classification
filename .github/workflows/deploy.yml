@@ -1,0 +1,47 @@
+name: Deploy Brain Tumor AI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Build and Deploy to Cloud Run
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Authenticate with GCP using service account key
+      - name: Authenticate with GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # Step 3: Set up gcloud CLI
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: brain-tumor-ai-prod
+
+      # Step 4: Configure Docker for Artifact Registry
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+      # Step 5: Trigger Cloud Build
+      - name: Trigger Cloud Build
+        run: |
+          gcloud builds submit \
+            --config=cloudbuild.yaml \
+            --project=brain-tumor-ai-prod
+
+      # Step 6: Confirm deployment
+      - name: Confirm Cloud Run deployment
+        run: |
+          gcloud run services describe brain-tumor-backend \
+            --region=us-central1 \
+            --format="value(status.url)"
