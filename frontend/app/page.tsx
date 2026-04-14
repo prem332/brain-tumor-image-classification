@@ -33,17 +33,14 @@ export default function Home() {
     try {
       const formData = new FormData()
       formData.append('file', file)
-
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/predict`,
         { method: 'POST', body: formData }
       )
-
       if (!response.ok) {
         const err = await response.json()
         throw new Error(err.detail || 'Prediction failed')
       }
-
       const data: PredictionResult = await response.json()
       setResult(data)
     } catch (err: unknown) {
@@ -60,9 +57,13 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen" style={{ background: '#0a0f1e' }}>
+    <main style={{ background: '#0a0f1e', minHeight: '100vh' }}>
       <Header />
-      <div className="max-w-3xl mx-auto px-4 py-10">
+      <div style={{
+        maxWidth: 680,
+        margin: '0 auto',
+        padding: '40px 20px'
+      }}>
         <UploadSection
           onUpload={handleUpload}
           loading={loading}
@@ -70,8 +71,11 @@ export default function Home() {
           onReset={handleReset}
         />
         {error && (
-          <div className="mt-6 p-4 rounded-xl text-sm"
-            style={{ background: '#1a0a0a', border: '1px solid #7f1d1d', color: '#fca5a5' }}>
+          <div style={{
+            marginTop: 16, padding: 16, borderRadius: 12,
+            background: '#1a0a0a', border: '1px solid #7f1d1d', color: '#fca5a5',
+            fontSize: 13
+          }}>
             {error}
           </div>
         )}
