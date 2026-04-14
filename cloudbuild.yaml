@@ -1,18 +1,16 @@
 steps:
   # ── BACKEND ─────────────────────────────────────────────
 
-  # Step 1: Build backend image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build-backend'
     args:
       - 'build'
       - '-t'
-      - 'us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/backend:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/backend:$BUILD_ID'
       - '-t'
       - 'us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/backend:latest'
       - './backend'
 
-  # Step 2: Push backend image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'push-backend'
     waitFor: ['build-backend']
@@ -21,7 +19,6 @@ steps:
       - '--all-tags'
       - 'us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/backend'
 
-  # Step 3: Deploy backend to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'deploy-backend'
     waitFor: ['push-backend']
@@ -30,7 +27,7 @@ steps:
       - 'run'
       - 'deploy'
       - 'brain-tumor-backend'
-      - '--image=us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/backend:$COMMIT_SHA'
+      - '--image=us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/backend:$BUILD_ID'
       - '--region=us-central1'
       - '--platform=managed'
       - '--allow-unauthenticated'
@@ -41,21 +38,17 @@ steps:
 
   # ── FRONTEND ────────────────────────────────────────────
 
-  # Step 4: Build frontend image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build-frontend'
     waitFor: ['deploy-backend']
     args:
       - 'build'
       - '-t'
-      - 'us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/frontend:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/frontend:$BUILD_ID'
       - '-t'
       - 'us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/frontend:latest'
-      - '--build-arg'
-      - 'NEXT_PUBLIC_API_URL=https://brain-tumor-backend-$(gcloud run services describe brain-tumor-backend --region=us-central1 --format="value(status.url)" | sed "s/https:\/\///g")'
       - './frontend'
 
-  # Step 5: Push frontend image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'push-frontend'
     waitFor: ['build-frontend']
@@ -64,7 +57,6 @@ steps:
       - '--all-tags'
       - 'us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/frontend'
 
-  # Step 6: Deploy frontend to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'deploy-frontend'
     waitFor: ['push-frontend']
@@ -73,7 +65,7 @@ steps:
       - 'run'
       - 'deploy'
       - 'brain-tumor-frontend'
-      - '--image=us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/frontend:$COMMIT_SHA'
+      - '--image=us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/frontend:$BUILD_ID'
       - '--region=us-central1'
       - '--platform=managed'
       - '--allow-unauthenticated'
@@ -81,9 +73,8 @@ steps:
       - '--cpu=1'
       - '--port=3000'
 
-# Store images
 images:
-  - 'us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/backend:$COMMIT_SHA'
-  - 'us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/frontend:$COMMIT_SHA'
+  - 'us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/backend:$BUILD_ID'
+  - 'us-central1-docker.pkg.dev/brain-tumor-ai-prod/brain-tumor-repo/frontend:$BUILD_ID'
 
 timeout: '1800s'
